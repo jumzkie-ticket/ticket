@@ -4,23 +4,48 @@
 header('Content-Type: application/json');
 
 try {
-    // Set environment variables
+    // Set environment variables (same as api/index.php)
     $envVars = [
-        'APP_NAME', 'APP_ENV', 'APP_KEY', 'APP_DEBUG', 'APP_URL',
+        'APP_NAME', 'APP_ENV', 'APP_KEY', 'APP_DEBUG', 'APP_URL', 'APP_LOCALE', 'APP_FALLBACK_LOCALE',
         'LOG_CHANNEL', 'LOG_LEVEL',
         'DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD', 'DB_SSLMODE',
         'SESSION_DRIVER', 'SESSION_LIFETIME', 'SESSION_ENCRYPT',
-        'CACHE_DRIVER', 'QUEUE_CONNECTION', 'FILESYSTEM_DISK'
+        'CACHE_DRIVER', 'QUEUE_CONNECTION', 'FILESYSTEM_DISK',
+        'MAIL_MAILER', 'MAIL_FROM_ADDRESS', 'MAIL_FROM_NAME'
     ];
 
     foreach ($envVars as $var) {
         if (isset($_ENV[$var])) {
             putenv("$var={$_ENV[$var]}");
+            $_SERVER[$var] = $_ENV[$var];
         }
     }
 
-    if (!getenv('APP_ENV')) putenv('APP_ENV=production');
-    if (!getenv('LOG_CHANNEL')) putenv('LOG_CHANNEL=stderr');
+    if (!getenv('APP_ENV')) {
+        putenv('APP_ENV=production');
+        $_SERVER['APP_ENV'] = 'production';
+    }
+    if (!getenv('LOG_CHANNEL')) {
+        putenv('LOG_CHANNEL=stderr');
+        $_SERVER['LOG_CHANNEL'] = 'stderr';
+    }
+
+    // Create .env file in /tmp
+    $tmpEnvPath = '/tmp/.env';
+    if (!file_exists($tmpEnvPath)) {
+        $envContent = '';
+        foreach ($envVars as $var) {
+            $value = getenv($var);
+            if ($value !== false) {
+                $value = str_contains($value, ' ') ? "\"{$value}\"" : $value;
+                $envContent .= "$var=$value\n";
+            }
+        }
+        file_put_contents($tmpEnvPath, $envContent);
+    }
+
+    putenv("LARAVEL_ENV_PATH=/tmp");
+    $_SERVER['LARAVEL_ENV_PATH'] = '/tmp';
 
     // Load Laravel
     define('LARAVEL_START', microtime(true));
