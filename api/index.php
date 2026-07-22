@@ -1,34 +1,25 @@
 <?php
 
-// Laravel application entry point for Vercel
-// This forwards all requests to Laravel's public/index.php
+/**
+ * Laravel application entry point for Vercel
+ * This handles all PHP requests in the Vercel serverless environment
+ */
 
-// Define the base path
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
 define('LARAVEL_START', microtime(true));
 
-// Check if running in Vercel environment
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require __DIR__ . '/../vendor/autoload.php';
-} else {
-    // Vercel doesn't run composer install by default for PHP
-    // We need to handle this differently
-    http_response_code(500);
-    echo json_encode([
-        'error' => 'Application dependencies not installed. Please configure Vercel to install Composer dependencies.'
-    ]);
-    exit(1);
+// Determine if the application is in maintenance mode
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
 }
 
-// Bootstrap Laravel
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+// Register the Composer autoloader
+require __DIR__.'/../vendor/autoload.php';
 
-// Handle the request
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+// Bootstrap Laravel and handle the request
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
-
-$response->send();
-
-$kernel->terminate($request, $response);
+$app->handleRequest(Request::capture());

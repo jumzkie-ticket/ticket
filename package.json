@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "vercel-build": "npm run build"
+        "vercel-build": "node vercel-install.js && npm run build"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
