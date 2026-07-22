@@ -122,6 +122,15 @@ FILESYSTEM_DISK="${process.env.FILESYSTEM_DISK || 'public'}"
 fs.writeFileSync('.env', envContent);
 console.log('.env file created successfully!');
 
+// Create .env file by copying the production template
+console.log('Creating .env file for production...');
+if (fs.existsSync('.env.production.vercel')) {
+  fs.copyFileSync('.env.production.vercel', '.env');
+  console.log('.env file created from .env.production.vercel');
+} else {
+  console.warn('Warning: .env.production.vercel not found');
+}
+
 // Clean up local composer if we downloaded it
 if (composerCmd === './composer' && fs.existsSync('composer')) {
   fs.unlinkSync('composer');
