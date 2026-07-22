@@ -16,9 +16,17 @@
           "database/**"
         ]
       }
+    },
+    {
+      "src": "api/test.php",
+      "use": "vercel-php@0.8.0"
     }
   ],
   "routes": [
+    {
+      "src": "/test",
+      "dest": "/api/test.php"
+    },
     {
       "src": "/build/(.*)",
       "dest": "/public/build/$1"
