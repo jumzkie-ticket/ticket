@@ -65,6 +65,14 @@ class SystemSettingsTest extends TestCase
             ->assertStatus(200)
             ->assertSee('id="primary_color"', false)
             ->assertSee('id="primary_color_picker"', false)
+            ->assertSee('name="theme" value="light"', false)
+            ->assertSee('name="theme" value="dark"', false)
+            ->assertSee('name="theme" value="system"', false)
+            ->assertSee('id="appearance-preview"', false)
+            ->assertSee('Preview updates instantly. Save changes to apply the theme across all modules.')
+            ->assertSee('.brand-logo-image', false)
+            ->assertSee('height: 66px', false)
+            ->assertSee('flex-direction: column', false)
             ->assertSee('aria-label="Suggested primary colors"', false)
             ->assertSee('data-color="#2563EB"', false)
             ->assertSee('data-color="#20B96F"', false);
@@ -117,6 +125,8 @@ class SystemSettingsTest extends TestCase
             ->assertSee('value="Acme Support Inc."', false)
             ->assertSee('value="Acme Ticket Desk"', false)
             ->assertSee('value="#123ABC"', false)
+            ->assertSee('aria-label="Acme Ticket Desk dashboard"', false)
+            ->assertSee('&copy; 2026 Acme Support Inc.', false)
             ->assertSee('System settings saved successfully.', false);
     }
 
@@ -202,6 +212,17 @@ class SystemSettingsTest extends TestCase
         foreach ([
             route('dashboard'),
             route('about-us'),
+            route('clients.index'),
+            route('clients.registration'),
+            route('service-order-details.index'),
+            route('service-order-details.detail'),
+            route('industry-business-types.index'),
+            route('sap-products.index'),
+            route('account-managers.index'),
+            route('assign-fcs.index'),
+            route('packages.index'),
+            route('product-details'),
+            route('contact-support'),
             route('roles.index'),
             route('users.index'),
             route('system-settings'),
@@ -210,7 +231,12 @@ class SystemSettingsTest extends TestCase
                 ->assertStatus(200)
                 ->assertSee('class="app-theme-dark"', false)
                 ->assertSee('--blue: #123ABC', false)
-                ->assertSee('--blue-rgb: 18, 58, 188', false);
+                ->assertSee('--blue-rgb: 18, 58, 188', false)
+                ->assertSee('--primary: #123ABC', false)
+                ->assertSee(':root.app-theme-dark .content-area :is(', false)
+                ->assertSee('color: var(--ink) !important', false)
+                ->assertSee('background: var(--panel) !important', false)
+                ->assertSee('Shared appearance layer', false);
         }
     }
 }

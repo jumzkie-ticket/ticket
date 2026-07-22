@@ -498,12 +498,7 @@
                     </div>
                 </div>
 
-                @if (session('status'))
-                    <div class="contact-flash">
-                        <svg width="16" height="16"><use href="#icon-check-circle"></use></svg>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                <x-status-prompt />
 
                 @if ($errors->any())
                     <ul class="contact-errors">

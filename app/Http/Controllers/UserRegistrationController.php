@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
+use App\Models\ClientUser;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -17,7 +20,7 @@ class UserRegistrationController extends Controller
         $field = $this->searchField($request->input('field', 'all'));
 
         $users = User::query()
-            ->with('roles')
+            ->with(['client', 'roles'])
             ->when($search !== '', fn ($query) => $this->applySearch($query, $field, $search))
             ->orderByDesc('created_at')
             ->orderBy('first_name')
@@ -28,14 +31,18 @@ class UserRegistrationController extends Controller
             ->orderBy('name')
             ->get();
 
+        $clients = Client::query()
+            ->orderBy('company_name')
+            ->get(['id', 'company_name']);
+
         $modalMode = null;
         $selectedUser = null;
 
         if ($request->filled('view')) {
-            $selectedUser = User::with('roles')->find($request->integer('view'));
+            $selectedUser = User::with(['client', 'roles'])->find($request->integer('view'));
             $modalMode = $selectedUser ? 'view' : null;
         } elseif ($request->filled('edit')) {
-            $selectedUser = User::with('roles')->find($request->integer('edit'));
+            $selectedUser = User::with(['client', 'roles'])->find($request->integer('edit'));
             $modalMode = $selectedUser ? 'edit' : null;
         } elseif ($request->boolean('create')) {
             $modalMode = 'create';
@@ -48,21 +55,28 @@ class UserRegistrationController extends Controller
             'consultants' => $this->usersInRole('consultant'),
         ];
 
-        return view('users.index', compact('field', 'modalMode', 'roles', 'search', 'selectedUser', 'stats', 'users'));
+        return view('users.index', compact('clients', 'field', 'modalMode', 'roles', 'search', 'selectedUser', 'stats', 'users'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedUser($request);
 
-        $user = User::create([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-        ]);
+        DB::transaction(function () use ($data): void {
+            $user = User::create([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'password' => $data['password'],
+            ]);
 
-        $user->roles()->sync([$data['role_id']]);
+            ClientUser::create([
+                'user_id' => $user->id,
+                'client_id' => $data['clients_id'],
+            ]);
+
+            $user->roles()->sync([$data['role_id']]);
+        });
 
         return redirect()
             ->route('users.index')
@@ -83,8 +97,13 @@ class UserRegistrationController extends Controller
             $userData['password'] = $data['password'];
         }
 
-        $user->update($userData);
-        $user->roles()->sync([$data['role_id']]);
+        DB::transaction(function () use ($data, $user, $userData): void {
+            $user->update($userData);
+            $user->clientUser()->updateOrCreate([], [
+                'client_id' => $data['clients_id'],
+            ]);
+            $user->roles()->sync([$data['role_id']]);
+        });
 
         return redirect()
             ->route('users.index', ['view' => $user->id])
@@ -101,11 +120,12 @@ class UserRegistrationController extends Controller
     }
 
     /**
-     * @return array{first_name:string,last_name:string,email:string,password?:string,role_id:int}
+     * @return array{clients_id:int,first_name:string,last_name:string,email:string,password?:string,role_id:int}
      */
     private function validatedUser(Request $request, ?User $user = null): array
     {
         return $request->validate([
+            'clients_id' => ['required', 'integer', Rule::exists('clients', 'id')],
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'role_id' => ['required', 'integer', Rule::exists('roles', 'id')],

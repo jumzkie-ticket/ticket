@@ -14,6 +14,20 @@
         : '#2563EB';
     [$appearancePrimaryR, $appearancePrimaryG, $appearancePrimaryB] = sscanf(ltrim($appearancePrimary, '#'), '%02x%02x%02x');
     $appearancePrimaryRgb = "{$appearancePrimaryR}, {$appearancePrimaryG}, {$appearancePrimaryB}";
+    $appearanceSystemName = (string) ($appearanceSettings->system_name ?? 'XTI Ticket Support System');
+    $appearanceCompanyName = (string) ($appearanceSettings->company_name ?? 'Xceler8 Technologies Inc.');
+    $appearanceLogoUrl = null;
+
+    try {
+        if (
+            ! empty($appearanceSettings->logo_path)
+            && \Illuminate\Support\Facades\Storage::disk('public')->exists($appearanceSettings->logo_path)
+        ) {
+            $appearanceLogoUrl = '/storage/'.ltrim($appearanceSettings->logo_path, '/');
+        }
+    } catch (\Throwable) {
+        $appearanceLogoUrl = null;
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -21,8 +35,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
-    <title>@yield('title', 'Dashboard') | Xceler8 Support System</title>
+    <title>@yield('title', 'Dashboard') | {{ $appearanceSystemName }}</title>
 
     @fonts
 
@@ -185,7 +200,7 @@
             gap: 10px;
             padding: 0 10px 0 12px;
             border-radius: 7px;
-            color: rgba(255, 255, 255, .84);
+            color: #ffffff;
             list-style: none;
             cursor: pointer;
         }
@@ -203,7 +218,7 @@
         }
 
         .nav-heading {
-            color: inherit;
+            color: #ffffff;
             font-size: 10px;
             font-weight: 900;
             text-transform: uppercase;
@@ -727,6 +742,407 @@
             border-color: var(--blue);
             box-shadow: 0 0 0 3px rgba(var(--blue-rgb), .12);
         }
+
+        /* Shared appearance layer: loaded after every module's local styles. */
+        :root {
+            --primary: {{ $appearancePrimary }};
+            --primary-rgb: {{ $appearancePrimaryRgb }};
+            --primary-soft: rgba({{ $appearancePrimaryRgb }}, .11);
+            --panel-subtle: #f8fafc;
+            --panel-muted: #f1f5f9;
+            --input-bg: #ffffff;
+            --line-strong: #c8d3e1;
+            --sidebar-start: color-mix(in srgb, var(--primary) 68%, #102a56);
+            --sidebar-end: color-mix(in srgb, var(--primary) 14%, #07162f);
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, .05);
+            --shadow: 0 10px 30px rgba(15, 23, 42, .07);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --blue: var(--primary);
+            --blue-rgb: var(--primary-rgb);
+            --blue-soft: var(--primary-soft);
+        }
+
+        :root.app-theme-dark {
+            --ink: #e7edf7;
+            --muted: #9eacc0;
+            --line: #2a3a51;
+            --line-strong: #3a4d68;
+            --panel: #111c2e;
+            --panel-subtle: #152238;
+            --panel-muted: #1b2a42;
+            --input-bg: #0d1829;
+            --canvas: #091321;
+            --primary-soft: rgba(var(--primary-rgb), .2);
+            --sidebar-start: color-mix(in srgb, var(--primary) 34%, #101c30);
+            --sidebar-end: #050b14;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, .2);
+            --shadow: 0 14px 34px rgba(0, 0, 0, .24);
+        }
+
+        :root.app-theme-dark .content-area :is(
+            label,
+            legend,
+            [class$="-label"],
+            [class*="-label "],
+            .settings-label,
+            .field-label,
+            .form-label
+        ) {
+            color: var(--ink) !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root.app-theme-system {
+                --ink: #e7edf7;
+                --muted: #9eacc0;
+                --line: #2a3a51;
+                --line-strong: #3a4d68;
+                --panel: #111c2e;
+                --panel-subtle: #152238;
+                --panel-muted: #1b2a42;
+                --input-bg: #0d1829;
+                --canvas: #091321;
+                --primary-soft: rgba(var(--primary-rgb), .2);
+                --sidebar-start: color-mix(in srgb, var(--primary) 34%, #101c30);
+                --sidebar-end: #050b14;
+                --shadow-sm: 0 1px 2px rgba(0, 0, 0, .2);
+                --shadow: 0 14px 34px rgba(0, 0, 0, .24);
+            }
+
+            :root.app-theme-system .content-area :is(
+                label,
+                legend,
+                [class$="-label"],
+                [class*="-label "],
+                .settings-label,
+                .field-label,
+                .form-label
+            ) {
+                color: var(--ink) !important;
+            }
+        }
+
+        body {
+            background: var(--canvas);
+            color: var(--ink);
+            transition: background-color .2s ease, color .2s ease;
+        }
+
+        .app-frame {
+            grid-template-columns: 248px minmax(0, 1fr);
+        }
+
+        .side-pane {
+            gap: 20px;
+            padding: 22px 16px 14px;
+            background: linear-gradient(165deg, var(--sidebar-start) 0%, var(--sidebar-end) 72%);
+            box-shadow: 8px 0 30px rgba(4, 14, 31, .08);
+        }
+
+        .brand {
+            width: 100%;
+            min-height: 118px;
+            flex-direction: column;
+            justify-content: center;
+            gap: 9px;
+            padding: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .08);
+            backdrop-filter: blur(8px);
+        }
+
+        .brand-logo-image,
+        .brand-monogram {
+            width: 100%;
+            height: 66px;
+            flex: 0 0 auto;
+            border-radius: 9px;
+        }
+
+        .brand-logo-image {
+            padding: 6px 10px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, .96);
+        }
+
+        .brand .brand-monogram {
+            width: 66px;
+            display: grid;
+            place-items: center;
+            margin: 0;
+            background: #ffffff;
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 950;
+            letter-spacing: -.3px;
+        }
+
+        .brand .brand-copy {
+            width: 100%;
+            min-width: 0;
+            display: grid;
+            gap: 3px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .brand .brand-copy strong,
+        .brand .brand-copy small {
+            color: #ffffff;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .brand .brand-copy strong {
+            font-size: 12px;
+            line-height: 1.3;
+            font-weight: 850;
+            letter-spacing: .15px;
+        }
+
+        .brand .brand-copy small {
+            color: rgba(255, 255, 255, .7);
+            font-size: 9px;
+            line-height: 1.35;
+            font-weight: 650;
+            letter-spacing: .1px;
+        }
+
+        .nav-groups {
+            gap: 7px;
+        }
+
+        .nav-group {
+            gap: 5px;
+        }
+
+        .nav-parent,
+        .nav-item {
+            border-radius: 9px;
+        }
+
+        .nav-parent {
+            min-height: 36px;
+        }
+
+        .nav-heading {
+            color: rgba(255, 255, 255, .66);
+            font-size: 11px;
+            letter-spacing: .75px;
+        }
+
+        .nav-group-items {
+            gap: 4px;
+        }
+
+        .nav-item {
+            min-height: 42px;
+            padding-left: 18px;
+            color: rgba(255, 255, 255, .82);
+            font-size: 14px;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            box-shadow: 0 8px 20px rgba(var(--primary-rgb), .28);
+            color: #ffffff;
+        }
+
+        .nav-item:hover:not(.active),
+        .nav-item:focus-visible:not(.active) {
+            background: rgba(255, 255, 255, .09);
+            color: #ffffff;
+        }
+
+        .support-card {
+            border-radius: 11px;
+            background: rgba(255, 255, 255, .07);
+        }
+
+        .main-header {
+            min-height: 82px;
+            padding: 16px 30px;
+            border-color: var(--line);
+            background: color-mix(in srgb, var(--panel) 94%, transparent);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(12px);
+        }
+
+        .page-title {
+            font-size: 25px;
+            letter-spacing: -.5px;
+        }
+
+        .header-icon {
+            border: 1px solid transparent;
+            border-radius: 9px;
+            color: var(--ink);
+        }
+
+        .header-icon:hover,
+        .header-icon:focus-visible {
+            border-color: var(--line);
+            background: var(--panel-subtle);
+            color: var(--primary);
+            outline: none;
+        }
+
+        .profile-toggle,
+        .profile-dropdown {
+            border-color: var(--line);
+            border-radius: 10px;
+            background: var(--panel);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-name,
+        .profile-toggle svg {
+            color: var(--ink);
+        }
+
+        .content-area {
+            width: 100%;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 26px 30px 38px;
+        }
+
+        .content-area :is([class$="-card"], [class$="-panel"], [class$="-section"], [class$="-modal-dialog"]) {
+            border-color: var(--line) !important;
+            background: var(--panel) !important;
+            color: var(--ink);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .content-area :is([class$="-title"], [class$="-name"], [class$="-label"], h2, h3, h4) {
+            color: var(--ink);
+        }
+
+        .content-area .header-title h1 {
+            color: var(--ink) !important;
+        }
+
+        .content-area .header-title .eyebrow {
+            color: var(--primary) !important;
+        }
+
+        .content-area .header-title p {
+            color: var(--muted) !important;
+        }
+
+        .content-area :is([class$="-copy"], [class$="-subtitle"], [class$="-meta"], [class$="-hint"], small) {
+            color: var(--muted);
+        }
+
+        .content-area :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]), select, textarea) {
+            border-color: var(--line-strong) !important;
+            background: var(--input-bg) !important;
+            color: var(--ink) !important;
+        }
+
+        .content-area :is(input, select, textarea)::placeholder {
+            color: var(--muted);
+            opacity: .82;
+        }
+
+        .content-area :is(input, select, textarea):focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), .13) !important;
+            outline: none;
+        }
+
+        .content-area :is(table, thead, tbody, tr, th, td) {
+            border-color: var(--line) !important;
+        }
+
+        .content-area table {
+            background: var(--panel);
+            color: var(--ink);
+        }
+
+        .content-area thead th {
+            background: var(--panel-muted) !important;
+            color: var(--muted) !important;
+        }
+
+        .content-area tbody td {
+            background: var(--panel) !important;
+            color: var(--ink);
+        }
+
+        .content-area tbody tr:hover td {
+            background: var(--panel-subtle) !important;
+        }
+
+        .content-area .man-days-header {
+            color: var(--primary) !important;
+        }
+
+        .content-area .man-days-table {
+            border-color: var(--line) !important;
+            background: var(--panel) !important;
+        }
+
+        .content-area .man-days-col {
+            border-color: var(--line) !important;
+            background: var(--panel) !important;
+        }
+
+        .content-area .man-days-col-header {
+            border-color: var(--line) !important;
+            background: var(--panel-muted) !important;
+            color: var(--ink) !important;
+        }
+
+        .content-area .summary-section .summary-value {
+            color: var(--green) !important;
+        }
+
+        .content-area :is(button, a)[class*="primary"],
+        .content-area :is(.button-primary, .btn-primary, .contact-button-primary, .client-button-primary, .product-button, .package-button) {
+            border-color: var(--primary) !important;
+            background: var(--primary) !important;
+            color: #ffffff !important;
+        }
+
+        .content-area :is(button, a)[class*="primary"]:hover,
+        .content-area :is(button, a)[class*="primary"]:focus-visible {
+            filter: brightness(.94);
+        }
+
+        .content-area a:not([class]) {
+            color: var(--primary);
+        }
+
+        .app-footer {
+            padding: 0 30px 24px;
+            color: var(--muted);
+        }
+
+        @media (max-width: 1120px) {
+            .app-frame {
+                grid-template-columns: 1fr;
+            }
+
+            .side-pane {
+                box-shadow: none;
+            }
+
+            .brand {
+                max-width: 340px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .content-area {
+                padding: 18px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -760,6 +1176,10 @@
         <symbol id="icon-report" viewBox="0 0 24 24">
             <path d="M7 4h10v16H7V4Z" fill="none" stroke="currentColor" stroke-width="1.8"/>
             <path d="M10 8h4M10 12h4M10 16h2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-doc" viewBox="0 0 24 24">
+            <path d="M7 4h7l4 4v12H7V4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M14 4v5h4M10 13h5M10 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </symbol>
         <symbol id="icon-gauge" viewBox="0 0 24 24">
             <path d="M5 17a7 7 0 1 1 14 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -822,6 +1242,17 @@
         <symbol id="icon-list" viewBox="0 0 24 24">
             <path d="M10 7h9M10 12h9M10 17h9M5 7h.01M5 12h.01M5 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24">
+            <path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        </symbol>
+        <symbol id="icon-pencil" viewBox="0 0 24 24">
+            <path d="M5 19h4l10-10-4-4L5 15v4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="m13.8 6.2 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="icon-trash" viewBox="0 0 24 24">
+            <path d="M5 7h14M10 11v6M14 11v6M8 7l1-3h6l1 3M7 7l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
     </svg>
 
     @php
@@ -836,8 +1267,8 @@
                 'label' => 'Main',
                 'items' => [
                     ['label' => 'Dashboard', 'icon' => 'icon-dashboard', 'href' => route('dashboard'), 'active' => request()->routeIs('dashboard')],
-                    ['label' => 'Create Ticket', 'icon' => 'icon-plus', 'href' => '#', 'active' => false],
-                    ['label' => 'My Ticket', 'icon' => 'icon-ticket', 'href' => '#', 'active' => false],
+                    ['label' => 'Create Ticket', 'icon' => 'icon-plus', 'href' => route('tickets.create'), 'active' => request()->routeIs('tickets.create')],
+                    ['label' => 'My Ticket', 'icon' => 'icon-ticket', 'href' => route('tickets.index'), 'active' => request()->routeIs('tickets.index')],
                     ['label' => 'Knowledge Base', 'icon' => 'icon-book', 'href' => '#', 'active' => false],
                     ['label' => 'Announcement', 'icon' => 'icon-megaphone', 'href' => '#', 'active' => false],
                 ],
@@ -845,8 +1276,24 @@
             [
                 'label' => 'Customer Management',
                 'items' => [
-                    ['label' => 'Clients', 'icon' => 'icon-client', 'href' => '#', 'active' => false],
+                    ['label' => 'Clients', 'icon' => 'icon-client', 'href' => route('clients.index'), 'active' => request()->routeIs('clients.index')],
                     ['label' => 'Client Registration', 'icon' => 'icon-plus', 'href' => route('clients.registration'), 'active' => request()->routeIs('clients.registration')],
+                    ['label' => 'Service Order', 'icon' => 'icon-list', 'href' => route('service-order-details.index'), 'active' => request()->routeIs('service-order-details.index')],
+                    ['label' => 'Service Order List', 'icon' => 'icon-doc', 'href' => route('service-order-details.detail'), 'active' => request()->routeIs('service-order-details.detail')],
+                    ['label' => 'Industry / Business Type', 'icon' => 'icon-list', 'href' => route('industry-business-types.index'), 'active' => request()->routeIs('industry-business-types.*')],
+                    ['label' => 'Work Agreement', 'icon' => 'icon-doc', 'href' => route('work-agreements.index'), 'active' => request()->routeIs('work-agreements.*')],
+                ],
+            ],
+            [
+                'label' => 'Setup',
+                'items' => [
+                    ['label' => 'Account Manager', 'icon' => 'icon-client', 'href' => route('account-managers.index'), 'active' => request()->routeIs('account-managers.*')],
+                    ['label' => 'Assign FC', 'icon' => 'icon-client', 'href' => route('assign-fcs.index'), 'active' => request()->routeIs('assign-fcs.*')],
+                    ['label' => 'Package', 'icon' => 'icon-list', 'href' => route('packages.index'), 'active' => request()->routeIs('packages.*')],
+                    ['label' => 'Product Details', 'icon' => 'icon-list', 'href' => route('product-details'), 'active' => request()->routeIs('product-details')],
+                    ['label' => 'Product Used', 'icon' => 'icon-book', 'href' => route('sap-products.index'), 'active' => request()->routeIs('sap-products.*')],
+                    ['label' => 'Security Level', 'icon' => 'icon-list', 'href' => route('security-levels.index'), 'active' => request()->routeIs('security-levels.*')],
+                    ['label' => 'Ticket Status', 'icon' => 'icon-check-circle', 'href' => route('ticket-statuses.index'), 'active' => request()->routeIs('ticket-statuses.*')],
                 ],
             ],
             [
@@ -873,14 +1320,43 @@
                 ],
             ],
         ];
+
+        if ($currentUser?->roles->contains('slug', 'customer')) {
+            $customerMenuItems = [
+                'Dashboard',
+                'Create Ticket',
+                'My Ticket',
+                'Knowledge Base',
+                'Announcement',
+                'Contact Support',
+            ];
+
+            $navGroups = collect($navGroups)
+                ->map(function (array $group) use ($customerMenuItems): array {
+                    $group['items'] = collect($group['items'])
+                        ->filter(fn (array $item): bool => in_array($item['label'], $customerMenuItems, true))
+                        ->values()
+                        ->all();
+
+                    return $group;
+                })
+                ->filter(fn (array $group): bool => count($group['items']) > 0)
+                ->values()
+                ->all();
+        }
     @endphp
 
     <div class="app-frame">
         <aside class="side-pane" aria-label="Main menu">
-            <a class="brand" href="{{ route('dashboard') }}" aria-label="Xceler8 dashboard">
-                <span>
-                    <strong>XCELER8</strong>
-                    <span>TECHNOLOGIES INC.</span>
+            <a class="brand" href="{{ route('dashboard') }}" aria-label="{{ $appearanceSystemName }} dashboard">
+                @if ($appearanceLogoUrl)
+                    <img class="brand-logo-image" src="{{ $appearanceLogoUrl }}" alt="">
+                @else
+                    <span class="brand-monogram" aria-hidden="true">X8</span>
+                @endif
+                <span class="brand-copy">
+                    <strong>{{ $appearanceSystemName }}</strong>
+                    <small>{{ $appearanceCompanyName }}</small>
                 </span>
             </a>
 
@@ -955,7 +1431,7 @@
             </main>
 
             <footer class="app-footer">
-                <span>&copy; 2026 Xceler8 Technologies Inc.</span>
+                <span>&copy; 2026 {{ $appearanceCompanyName }}</span>
                 <span class="version-chip">Version {{ $appVersion }}</span>
             </footer>
         </div>

@@ -70,8 +70,8 @@
 
         .metric-grid {
             display: grid;
-            grid-template-columns: repeat(5, minmax(170px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
         }
 
         .metric-card,
@@ -83,13 +83,23 @@
         }
 
         .metric-card {
-            min-height: 106px;
+            min-height: 100px;
             display: grid;
-            grid-template-columns: 46px minmax(0, 1fr);
+            grid-template-columns: 44px minmax(0, 1fr);
             align-items: center;
-            gap: 16px;
-            padding: 20px;
+            gap: 12px;
+            padding: 16px;
             border-color: var(--tone-border);
+        }
+
+        .status-metric {
+            --tone-color: var(--tone-color-light);
+            --tone-bg: color-mix(in srgb, var(--tone-color) 16%, transparent);
+            --tone-border: var(--line);
+        }
+
+        [data-theme="dark"] .status-metric {
+            --tone-color: var(--tone-color-dark);
         }
 
         .tone-blue {
@@ -151,7 +161,7 @@
         .metric-value {
             margin: 0;
             color: #061845;
-            font-size: 28px;
+            font-size: 24px;
             line-height: 1;
             font-weight: 900;
         }
@@ -165,7 +175,7 @@
 
         .analytics-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(340px, .9fr) minmax(360px, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 18px;
         }
 
@@ -195,7 +205,7 @@
         }
 
         .trend-chart text {
-            fill: #52698f;
+            fill: var(--muted);
             font-size: 10px;
             font-weight: 750;
         }
@@ -221,7 +231,7 @@
             position: absolute;
             inset: 40px;
             border-radius: 999px;
-            background: #ffffff;
+            background: var(--panel);
         }
 
         .legend {
@@ -237,7 +247,7 @@
             grid-template-columns: 10px minmax(0, 1fr);
             gap: 10px;
             align-items: start;
-            color: #17315f;
+            color: var(--ink);
             font-size: 11px;
             font-weight: 850;
         }
@@ -253,9 +263,15 @@
         .legend-item strong {
             display: block;
             margin-top: 5px;
-            color: #071b4d;
+            color: var(--muted);
             font-size: 10px;
             font-weight: 900;
+        }
+
+        .legend-empty {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 750;
         }
 
         .lower-grid {
@@ -291,14 +307,14 @@
 
         .recent-table thead th {
             color: #53698f;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 900;
             text-transform: uppercase;
         }
 
         .recent-table tbody td {
             color: #17315f;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 750;
         }
 
@@ -306,26 +322,27 @@
             display: block;
             color: #061845;
             font-weight: 900;
+            font-size: 14px;
         }
 
         .ticket-summary {
             display: block;
             margin-top: 4px;
             color: #61708f;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 650;
         }
 
         .status-track {
             width: min(220px, 100%);
-            min-height: 22px;
+            min-height: 26px;
             display: flex;
             align-items: center;
             padding: 0 8px;
             border-radius: 999px;
             background: var(--status-bg);
             color: var(--status-color);
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 900;
         }
 
@@ -356,7 +373,7 @@
         }
 
         .summary-row {
-            min-height: 48px;
+            min-height: 56px;
             display: grid;
             grid-template-columns: 28px minmax(0, 1fr) auto 16px;
             align-items: center;
@@ -376,14 +393,14 @@
 
         .summary-label {
             color: #17315f;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 750;
             overflow-wrap: anywhere;
         }
 
         .summary-value {
             color: #061845;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 900;
             white-space: nowrap;
         }
@@ -402,7 +419,7 @@
             gap: 12px;
             padding: 0 16px 16px;
             color: var(--blue);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 900;
             text-decoration: none;
         }
@@ -412,14 +429,29 @@
             height: 16px;
         }
 
-        @media (max-width: 1480px) {
-            .metric-grid {
-                grid-template-columns: repeat(3, minmax(190px, 1fr));
-            }
+        .table-panel .panel-title {
+            font-size: 15px;
+        }
 
-            .analytics-grid,
+        .table-panel .button-link {
+            font-size: 13px;
+        }
+
+        @media (max-width: 1480px) {
             .lower-grid {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1080px) {
+            .metric-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
 
@@ -430,7 +462,7 @@
             }
 
             .metric-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .chart-split {
@@ -440,6 +472,18 @@
 
             .date-filter {
                 width: 100%;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .metric-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 380px) {
+            .metric-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -454,19 +498,21 @@
             </h2>
             <button class="date-filter" type="button">
                 <svg><use href="#icon-calendar"></use></svg>
-                <span>May 19 - May 25, 2024</span>
+                <span>Last 30 Days</span>
                 <svg><use href="#icon-chevron-down"></use></svg>
             </button>
         </div>
 
         <section class="metric-grid" aria-label="Ticket analytics">
             @foreach ($metricCards as $metric)
-                <article class="metric-card tone-{{ $metric['tone'] }}">
+                <article
+                    class="metric-card status-metric"
+                    style="--tone-color-light: {{ $metric['palette']['light'] }}; --tone-color-dark: {{ $metric['palette']['dark'] }};"
+                >
                     <span class="metric-icon"><svg><use href="#{{ $metric['icon'] }}"></use></svg></span>
                     <div>
                         <p class="metric-label">{{ $metric['label'] }}</p>
                         <p class="metric-value">{{ $metric['value'] }}</p>
-                        <p class="metric-change">{{ $metric['change'] }}</p>
                     </div>
                 </article>
             @endforeach
@@ -479,7 +525,16 @@
                     <button class="panel-filter" type="button">Last 7 Days <svg><use href="#icon-chevron-down"></use></svg></button>
                 </div>
                 <div class="panel-body">
-                    <svg class="trend-chart" viewBox="0 0 620 230" role="img" aria-label="Ticket trend from May 19 to May 25">
+                    @php
+                        $trendMaximum = max(3, (int) ceil(max(1, $trend->max('value')) / 3) * 3);
+                        $trendPoints = $trend->map(function ($point, $index) use ($trendMaximum) {
+                            $x = 44 + ($index * 91);
+                            $y = 165 - (($point['value'] / $trendMaximum) * 135);
+
+                            return "{$x},{$y}";
+                        })->implode(' ');
+                    @endphp
+                    <svg class="trend-chart" viewBox="0 0 620 230" role="img" aria-label="Actual tickets created during the last 7 days">
                         <g stroke="#e4ebf6" stroke-width="1">
                             <path d="M44 30H590"/>
                             <path d="M44 75H590"/>
@@ -487,20 +542,22 @@
                             <path d="M44 165H590"/>
                         </g>
                         <g fill="#52698f">
-                            <text x="20" y="34">60</text>
-                            <text x="20" y="79">40</text>
-                            <text x="20" y="124">20</text>
+                            <text x="20" y="34">{{ $trendMaximum }}</text>
+                            <text x="20" y="79">{{ (int) round($trendMaximum * 2 / 3) }}</text>
+                            <text x="20" y="124">{{ (int) round($trendMaximum / 3) }}</text>
                             <text x="25" y="169">0</text>
                         </g>
-                        <polyline points="44,140 135,126 226,88 317,109 408,55 499,104 590,83" fill="none" stroke="var(--blue)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="{{ $trendPoints }}" fill="none" stroke="var(--blue)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
                         <g fill="var(--blue)" stroke="#ffffff" stroke-width="4">
-                            <circle cx="44" cy="140" r="5"/>
-                            <circle cx="135" cy="126" r="5"/>
-                            <circle cx="226" cy="88" r="5"/>
-                            <circle cx="317" cy="109" r="5"/>
-                            <circle cx="408" cy="55" r="5"/>
-                            <circle cx="499" cy="104" r="5"/>
-                            <circle cx="590" cy="83" r="5"/>
+                            @foreach ($trend as $index => $point)
+                                @php
+                                    $x = 44 + ($index * 91);
+                                    $y = 165 - (($point['value'] / $trendMaximum) * 135);
+                                @endphp
+                                <circle cx="{{ $x }}" cy="{{ $y }}" r="5">
+                                    <title>{{ $point['label'] }}: {{ $point['value'] }} ticket(s)</title>
+                                </circle>
+                            @endforeach
                         </g>
                         <g fill="#52698f">
                             @foreach ($trend as $index => $point)
@@ -518,14 +575,16 @@
                 </div>
                 <div class="panel-body">
                     <div class="chart-split">
-                        <div class="donut" style="--donut: conic-gradient(var(--blue) 0 26.6%, #2fc56f 26.6% 90.7%, #ff5148 90.7% 100%)"></div>
+                        <div class="donut" style="--donut: {{ $statusGradient }}" aria-label="Actual ticket status distribution for the last 7 days"></div>
                         <ul class="legend">
-                            @foreach ($statusBreakdown as $item)
-                                <li class="legend-item" style="--dot: {{ $item['color'] }}">
-                                    <span class="legend-dot"></span>
-                                    <span>{{ $item['label'] }}<strong>{{ $item['value'] }} ({{ $item['percent'] }})</strong></span>
-                                </li>
-                            @endforeach
+                            @forelse ($statusBreakdown as $item)
+                                    <li class="legend-item" style="--dot: {{ $item['color'] }}">
+                                        <span class="legend-dot"></span>
+                                        <span>{{ $item['label'] }}<strong>{{ $item['value'] }} ({{ $item['percent'] }})</strong></span>
+                                    </li>
+                            @empty
+                                <li class="legend-empty">No tickets in the last 7 days.</li>
+                            @endforelse
                         </ul>
                     </div>
                 </div>
@@ -538,14 +597,16 @@
                 </div>
                 <div class="panel-body">
                     <div class="chart-split">
-                        <div class="donut" style="--donut: conic-gradient(var(--blue) 0 45.3%, #2fc56f 45.3% 67.2%, #f4a51c 67.2% 79.7%, #765cff 79.7% 89.1%, #18aac4 89.1% 100%)"></div>
+                        <div class="donut" style="--donut: {{ $productGradient }}" aria-label="Actual ticket product distribution for the last 30 days"></div>
                         <ul class="legend">
-                            @foreach ($productBreakdown as $item)
+                            @forelse ($productBreakdown as $item)
                                 <li class="legend-item" style="--dot: {{ $item['color'] }}">
                                     <span class="legend-dot"></span>
                                     <span>{{ $item['label'] }}<strong>{{ $item['value'] }} ({{ $item['percent'] }})</strong></span>
                                 </li>
-                            @endforeach
+                            @empty
+                                <li class="legend-empty">No tickets in the last 30 days.</li>
+                            @endforelse
                         </ul>
                     </div>
                 </div>

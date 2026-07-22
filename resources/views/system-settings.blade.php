@@ -21,7 +21,7 @@
         }
 
         .settings-row-bottom {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: minmax(320px, 1.3fr) repeat(2, minmax(250px, .85fr));
         }
 
         .settings-card {
@@ -330,6 +330,192 @@
             outline: none;
         }
 
+        .theme-choice-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .theme-choice {
+            position: relative;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .theme-choice input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .theme-choice-content {
+            min-height: 72px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+            gap: 7px;
+            padding: 10px 6px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 850;
+            text-align: center;
+            transition: border-color .16s ease, background .16s ease, color .16s ease, box-shadow .16s ease;
+        }
+
+        .theme-choice-content svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .theme-choice:hover .theme-choice-content {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .theme-choice input:checked + .theme-choice-content {
+            border-color: var(--blue);
+            background: var(--blue-soft);
+            color: var(--blue);
+            box-shadow: 0 0 0 2px rgba(var(--blue-rgb), .08);
+        }
+
+        .theme-choice input:focus-visible + .theme-choice-content {
+            box-shadow: 0 0 0 3px rgba(var(--blue-rgb), .15);
+        }
+
+        .appearance-preview {
+            --preview-primary: var(--blue);
+            --preview-canvas: #eef3f9;
+            --preview-panel: #ffffff;
+            --preview-line: #d9e2ee;
+            --preview-ink: #13213a;
+            min-height: 154px;
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr);
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: var(--preview-canvas);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+        }
+
+        .appearance-preview[data-theme="dark"] {
+            --preview-canvas: #091321;
+            --preview-panel: #111c2e;
+            --preview-line: #2a3a51;
+            --preview-ink: #e7edf7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .appearance-preview[data-theme="system"] {
+                --preview-canvas: #091321;
+                --preview-panel: #111c2e;
+                --preview-line: #2a3a51;
+                --preview-ink: #e7edf7;
+            }
+        }
+
+        .appearance-preview-side {
+            display: grid;
+            align-content: start;
+            gap: 8px;
+            padding: 11px 8px;
+            background: linear-gradient(165deg, color-mix(in srgb, var(--preview-primary) 62%, #102a56), #07162f);
+        }
+
+        .appearance-preview-logo {
+            width: 28px;
+            height: 24px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, .92);
+        }
+
+        .appearance-preview-nav {
+            height: 6px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, .24);
+        }
+
+        .appearance-preview-nav.active {
+            height: 18px;
+            background: var(--preview-primary);
+        }
+
+        .appearance-preview-main {
+            min-width: 0;
+            display: grid;
+            grid-template-rows: 32px 1fr;
+        }
+
+        .appearance-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 0 10px;
+            border-bottom: 1px solid var(--preview-line);
+            background: var(--preview-panel);
+        }
+
+        .appearance-preview-title,
+        .appearance-preview-avatar,
+        .appearance-preview-line {
+            display: block;
+            border-radius: 99px;
+        }
+
+        .appearance-preview-title {
+            width: 62px;
+            height: 7px;
+            background: var(--preview-ink);
+        }
+
+        .appearance-preview-avatar {
+            width: 16px;
+            height: 16px;
+            background: var(--preview-primary);
+        }
+
+        .appearance-preview-content {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .appearance-preview-panel {
+            display: grid;
+            align-content: start;
+            gap: 7px;
+            padding: 9px;
+            border: 1px solid var(--preview-line);
+            border-radius: 7px;
+            background: var(--preview-panel);
+        }
+
+        .appearance-preview-line {
+            width: 78%;
+            height: 5px;
+            background: color-mix(in srgb, var(--preview-ink) 20%, transparent);
+        }
+
+        .appearance-preview-line.primary {
+            width: 44%;
+            height: 15px;
+            background: var(--preview-primary);
+        }
+
+        .appearance-preview-note {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
         .logo-dropzone {
             min-height: 196px;
             display: grid;
@@ -495,7 +681,8 @@
         }
 
         @media (max-width: 1020px) {
-            .settings-row-top {
+            .settings-row-top,
+            .settings-row-bottom {
                 grid-template-columns: 1fr;
             }
         }
@@ -529,6 +716,10 @@
 
             .settings-action {
                 width: 100%;
+            }
+
+            .theme-choice-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -595,12 +786,7 @@
         <input type="hidden" name="auto_backup" value="0">
         <input type="hidden" name="maintenance_mode" value="0">
 
-        @if (session('status'))
-            <div class="settings-flash">
-                <svg><use href="#settings-icon-check"></use></svg>
-                <span>{{ session('status') }}</span>
-            </div>
-        @endif
+        <x-status-prompt />
 
         @if ($errors->any())
             <ul class="settings-errors">
@@ -717,17 +903,32 @@
                 </div>
 
                 <div class="settings-fields">
-                    <label class="settings-field">
+                    <div class="settings-field">
                         <span class="settings-label">Theme</span>
-                        <span class="select-control">
-                            <select class="settings-select" name="theme">
-                                <option value="light" @selected(old('theme', $settings->theme) === 'light')>Light</option>
-                                <option value="dark" @selected(old('theme', $settings->theme) === 'dark')>Dark</option>
-                                <option value="system" @selected(old('theme', $settings->theme) === 'system')>System Default</option>
-                            </select>
-                            <svg><use href="#icon-chevron-down"></use></svg>
-                        </span>
-                    </label>
+                        <div class="theme-choice-grid" role="radiogroup" aria-label="Theme">
+                            <label class="theme-choice">
+                                <input type="radio" name="theme" value="light" @checked(old('theme', $settings->theme) === 'light')>
+                                <span class="theme-choice-content">
+                                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+                                    <span>Light</span>
+                                </span>
+                            </label>
+                            <label class="theme-choice">
+                                <input type="radio" name="theme" value="dark" @checked(old('theme', $settings->theme) === 'dark')>
+                                <span class="theme-choice-content">
+                                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z"></path></svg>
+                                    <span>Dark</span>
+                                </span>
+                            </label>
+                            <label class="theme-choice">
+                                <input type="radio" name="theme" value="system" @checked(old('theme', $settings->theme) === 'system')>
+                                <span class="theme-choice-content">
+                                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+                                    <span>System</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
                     <label class="settings-field">
                         <span class="settings-label">Primary Color</span>
                         <span class="color-stack">
@@ -750,6 +951,38 @@
                             </span>
                         </span>
                     </label>
+                    <div class="settings-field">
+                        <span class="settings-label">Live Preview</span>
+                        <div>
+                            <div class="appearance-preview" id="appearance-preview" data-theme="{{ old('theme', $settings->theme) }}">
+                                <div class="appearance-preview-side">
+                                    <span class="appearance-preview-logo"></span>
+                                    <span class="appearance-preview-nav active"></span>
+                                    <span class="appearance-preview-nav"></span>
+                                    <span class="appearance-preview-nav"></span>
+                                </div>
+                                <div class="appearance-preview-main">
+                                    <div class="appearance-preview-header">
+                                        <span class="appearance-preview-title"></span>
+                                        <span class="appearance-preview-avatar"></span>
+                                    </div>
+                                    <div class="appearance-preview-content">
+                                        <span class="appearance-preview-panel">
+                                            <span class="appearance-preview-line"></span>
+                                            <span class="appearance-preview-line primary"></span>
+                                            <span class="appearance-preview-line"></span>
+                                        </span>
+                                        <span class="appearance-preview-panel">
+                                            <span class="appearance-preview-line"></span>
+                                            <span class="appearance-preview-line"></span>
+                                            <span class="appearance-preview-line primary"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="appearance-preview-note">Preview updates instantly. Save changes to apply the theme across all modules.</span>
+                        </div>
+                    </div>
                     <div class="settings-field">
                         <span class="settings-label">System Logo</span>
                         <div class="logo-dropzone">
@@ -910,6 +1143,8 @@
             const primaryColorPicker = document.getElementById('primary_color_picker');
             const primaryColorPreview = document.getElementById('primary-color-preview');
             const paletteButtons = Array.from(document.querySelectorAll('.color-palette-button'));
+            const themeInputs = Array.from(document.querySelectorAll('input[name="theme"]'));
+            const appearancePreview = document.getElementById('appearance-preview');
             const colorPattern = /^#[0-9A-Fa-f]{6}$/;
 
             const syncPrimaryColor = (color) => {
@@ -931,13 +1166,50 @@
                     primaryColorPreview.style.background = normalizedColor;
                 }
 
+                if (appearancePreview) {
+                    appearancePreview.style.setProperty('--preview-primary', normalizedColor);
+                }
+
+                const red = parseInt(normalizedColor.slice(1, 3), 16);
+                const green = parseInt(normalizedColor.slice(3, 5), 16);
+                const blue = parseInt(normalizedColor.slice(5, 7), 16);
+                const rgb = `${red}, ${green}, ${blue}`;
+                const root = document.documentElement;
+
+                root.style.setProperty('--primary', normalizedColor);
+                root.style.setProperty('--primary-rgb', rgb);
+                root.style.setProperty('--blue', normalizedColor);
+                root.style.setProperty('--blue-rgb', rgb);
+
                 paletteButtons.forEach((button) => {
                     button.classList.toggle('active', button.dataset.color.toUpperCase() === normalizedColor);
                 });
             };
 
+            const syncTheme = (theme) => {
+                if (!['light', 'dark', 'system'].includes(theme)) {
+                    return;
+                }
+
+                const root = document.documentElement;
+                root.classList.remove('app-theme-light', 'app-theme-dark', 'app-theme-system');
+                root.classList.add(`app-theme-${theme}`);
+
+                if (appearancePreview) {
+                    appearancePreview.dataset.theme = theme;
+                }
+            };
+
             paletteButtons.forEach((button) => {
                 button.addEventListener('click', () => syncPrimaryColor(button.dataset.color));
+            });
+
+            themeInputs.forEach((input) => {
+                input.addEventListener('change', () => {
+                    if (input.checked) {
+                        syncTheme(input.value);
+                    }
+                });
             });
 
             if (primaryColorPicker) {
@@ -950,6 +1222,15 @@
                         syncPrimaryColor(primaryColorInput.value);
                     }
                 });
+            }
+
+            const selectedTheme = themeInputs.find((input) => input.checked);
+            if (selectedTheme) {
+                syncTheme(selectedTheme.value);
+            }
+
+            if (primaryColorInput && colorPattern.test(primaryColorInput.value)) {
+                syncPrimaryColor(primaryColorInput.value);
             }
 
             window.addEventListener('beforeunload', () => {

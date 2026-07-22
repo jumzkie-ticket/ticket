@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\AccountManager;
+use App\Models\IndustryBusinessType;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\SapProduct;
 use App\Models\SupportContactInfo;
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -24,15 +27,30 @@ class DatabaseSeeder extends Seeder
         $permissionNames = [
             'Analytics',
             'Announcements',
-            'Client Management',
+            'Account Manager',
+            'About Us',
+            'Assign FC',
+            'Clients',
+            'Client Registration',
             'Contact Support',
+            'Create Ticket',
             'Dashboard Access',
+            'Industry / Business Type',
             'Knowledge Base',
+            'My Ticket',
+            'Package',
+            'Product Details',
             'Reports',
+            'Role Management',
+            'Security Level',
+            'Service Order',
+            'Service Order List',
             'SLA & Performance',
+            'Product Used',
             'System Settings',
-            'Ticket Management',
+            'Ticket Status',
             'User Registration',
+            'Work Agreement',
         ];
 
         $permissions = collect($permissionNames)
@@ -58,11 +76,11 @@ class DatabaseSeeder extends Seeder
             ],
             'customer' => [
                 'name' => 'Customer',
-                'permissions' => ['announcements', 'contact-support', 'knowledge-base', 'ticket-management'],
+                'permissions' => ['announcements', 'contact-support', 'create-ticket', 'knowledge-base', 'my-ticket'],
             ],
             'consultant' => [
                 'name' => 'Consultant',
-                'permissions' => ['analytics', 'client-management', 'dashboard-access', 'knowledge-base', 'reports', 'sla-performance', 'ticket-management'],
+                'permissions' => ['account-manager', 'analytics', 'assign-fc', 'clients', 'client-registration', 'create-ticket', 'dashboard-access', 'industry-business-type', 'knowledge-base', 'my-ticket', 'package', 'product-details', 'product-used', 'reports', 'security-level', 'service-order', 'service-order-list', 'sla-performance', 'ticket-status', 'work-agreement'],
             ],
         ];
 
@@ -136,6 +154,21 @@ class DatabaseSeeder extends Seeder
 
             $user->roles()->sync([$roleModels[$userData['role']]->id]);
         }
+
+        foreach (IndustryBusinessType::defaults() as $industry) {
+            IndustryBusinessType::query()->firstOrCreate(['industry' => $industry]);
+        }
+
+        foreach (SapProduct::defaults() as $product) {
+            SapProduct::query()->firstOrCreate(['sap_product' => $product]);
+        }
+
+        foreach (AccountManager::defaults() as $accountManager) {
+            AccountManager::query()->firstOrCreate(['account_manager' => $accountManager]);
+        }
+
+        // Seed initial Assign FC values
+        $this->call(AssignFcSeeder::class);
 
         SystemSetting::query()->firstOrCreate([], SystemSetting::defaults());
         SupportContactInfo::query()->firstOrCreate([], SupportContactInfo::defaults());

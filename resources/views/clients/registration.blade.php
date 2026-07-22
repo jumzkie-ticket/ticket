@@ -1,5 +1,9 @@
 @extends('layouts.app-shell')
 
+@php
+    $selectedProductIds = array_map('strval', (array) old('sap_product_ids', []));
+@endphp
+
 @section('title', 'Client Registration')
 @section('page-title', 'Client Registration')
 @section('page-subtitle', 'Register client companies and capture support onboarding details.')
@@ -46,7 +50,7 @@
             gap: 10px;
             padding: 10px 14px;
             background: color-mix(in srgb, var(--blue-soft) 70%, var(--panel));
-            color: var(--blue);
+            color: #ffffff;
             font-size: 12px;
             font-weight: 800;
             line-height: 1.45;
@@ -167,6 +171,10 @@
             min-width: 0;
         }
 
+        .client-field.span-two {
+            grid-column: 1 / -1;
+        }
+
         .client-label {
             color: var(--ink);
             font-size: 11px;
@@ -238,7 +246,7 @@
 
         .phone-control {
             display: grid;
-            grid-template-columns: 82px minmax(0, 1fr);
+            grid-template-columns: 100px minmax(0, 1fr);
             gap: 8px;
         }
 
@@ -306,6 +314,23 @@
             background: var(--blue);
             color: #ffffff;
         }
+
+        .product-picker-row { display: flex; align-items: stretch; gap: 8px; }
+        .product-picker-row .client-input { min-width: 0; flex: 1; height: auto; min-height: 38px; padding: 9px 11px; resize: none; }
+        .product-picker-button { min-width: 108px; padding: 0 12px; border: 1px solid var(--blue); border-radius: 6px; background: var(--blue-soft); color: var(--blue); font-size: 11px; font-weight: 900; }
+        .product-picker-help { color: var(--muted); font-size: 10px; font-weight: 700; }
+        .product-modal { position: fixed; z-index: 1200; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(4, 15, 39, .68); }
+        .product-modal.active { display: flex; }
+        .product-modal-dialog { width: min(560px, 100%); overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 24px 65px rgba(0, 0, 0, .28); }
+        .product-modal-header, .product-modal-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; }
+        .product-modal-header { border-bottom: 1px solid var(--line); }
+        .product-modal-header h3 { margin: 0; color: var(--ink); font-size: 15px; }
+        .product-modal-close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--ink); font-size: 20px; }
+        .product-modal-body { max-height: 330px; display: grid; gap: 8px; padding: 16px 18px; overflow-y: auto; }
+        .product-modal-option { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font-size: 12px; font-weight: 750; cursor: pointer; }
+        .product-modal-option:hover { border-color: var(--blue); background: var(--blue-soft); }
+        .product-modal-option input { width: 16px; height: 16px; accent-color: var(--blue); }
+        .product-modal-actions { justify-content: flex-end; border-top: 1px solid var(--line); }
 
         .client-bottom-note {
             min-height: 48px;
@@ -612,7 +637,7 @@
         </symbol>
     </svg>
 
-    <div class="client-registration-page" data-client-registration data-psgc-base-url="{{ $psgcBaseUrl }}">
+    <div class="client-registration-page" data-client-registration data-psgc-base-url="{{ $psgcBaseUrl }}" data-country-code-api-url="{{ $countryCodeApiUrl }}" data-selected-country-code="{{ old('contact_country_code', '+63') }}">
         <div class="client-registration-layout">
             <div class="client-form-stack">
                 <div class="client-banner">
@@ -620,12 +645,7 @@
                     <span>Register your company to unlock faster support, track requests efficiently, and receive tailored assistance for your SAP Business One environment.</span>
                 </div>
 
-                @if (session('status'))
-                    <div class="client-flash">
-                        <svg><use href="#icon-check-circle"></use></svg>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                <x-status-prompt />
 
                 @if ($errors->any())
                     <ul class="client-errors">
@@ -658,6 +678,11 @@
                             </label>
 
                             <label class="client-field">
+                                <span class="client-label">Designation <span class="required">*</span></span>
+                                <input class="client-input" name="designation" type="text" value="{{ old('designation') }}" placeholder="Enter designation" required>
+                            </label>
+
+                            <label class="client-field">
                                 <span class="client-label">Email Address <span class="required">*</span></span>
                                 <input class="client-input" name="email_address" type="email" value="{{ old('email_address') }}" placeholder="Enter official email address" required>
                             </label>
@@ -666,12 +691,12 @@
                                 <span class="client-label">Contact Number <span class="required">*</span></span>
                                 <span class="phone-control">
                                     <span class="select-wrap">
-                                        <select class="client-select" name="contact_country_code" required>
-                                            <option value="+63" @selected(old('contact_country_code', '+63') === '+63')>PH +63</option>
+                                        <select class="client-select" name="contact_country_code" aria-label="Country calling code" required>
+                                            <option value="+63" selected>PH +63</option>
                                         </select>
                                         <svg><use href="#icon-chevron-down"></use></svg>
                                     </span>
-                                    <input class="client-input" name="contact_number" type="text" value="{{ old('contact_number') }}" placeholder="Contact number" required>
+                                    <input class="client-input" name="contact_number" type="text" value="{{ old('contact_number') }}" placeholder="Enter contact number" maxlength="40" required>
                                 </span>
                             </label>
                         </div>
@@ -754,32 +779,43 @@
                             <label class="client-field">
                                 <span class="client-label">Industry / Business Type <span class="required">*</span></span>
                                 <span class="select-wrap">
-                                    <select class="client-select" name="industry_type" required>
+                                    <select class="client-select" name="industry_business_type_id" required>
                                         <option value="">Select industry / business type</option>
-                                        @foreach ($industries as $value => $label)
-                                            <option value="{{ $value }}" @selected(old('industry_type') === $value)>{{ $label }}</option>
+                                        @foreach ($industries as $industry)
+                                            <option value="{{ $industry->id }}" @selected((string) old('industry_business_type_id') === (string) $industry->id)>{{ $industry->industry }}</option>
                                         @endforeach
                                     </select>
                                     <svg><use href="#icon-chevron-down"></use></svg>
                                 </span>
                             </label>
 
+                            <div class="client-field">
+                                <span class="client-label">Product Used <span class="required">*</span></span>
+                                <div class="product-picker-row">
+                                    <textarea class="client-input" id="selected-products-display" rows="2" placeholder="Select one or more products" readonly></textarea>
+                                    <button class="product-picker-button" id="open-product-modal" type="button">Select Products</button>
+                                </div>
+                                <div id="selected-products-inputs">
+                                    @foreach ($selectedProductIds as $selectedProductId)
+                                        <input type="hidden" name="sap_product_ids[]" value="{{ $selectedProductId }}">
+                                    @endforeach
+                                </div>
+                                <span class="product-picker-help">Choose one or more products from the popup window.</span>
+                            </div>
+
                             <label class="client-field">
-                                <span class="client-label">SAP Product Used <span class="required">*</span></span>
-                                <span class="select-wrap">
-                                    <select class="client-select" name="sap_product_used" required>
-                                        <option value="">Select SAP product</option>
-                                        @foreach ($sapProducts as $value => $label)
-                                            <option value="{{ $value }}" @selected(old('sap_product_used') === $value)>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                    <svg><use href="#icon-chevron-down"></use></svg>
-                                </span>
+                                <span class="client-label">Version Number format: (10.00.130) <span class="required">*</span></span>
+                                <input class="client-input" name="version_number" type="text" value="{{ old('version_number') }}" placeholder="10.00.130" required>
                             </label>
 
                             <label class="client-field">
-                                <span class="client-label">Software Version / Patch or FP <span class="required">*</span></span>
-                                <input class="client-input" name="software_version_patch" type="text" value="{{ old('software_version_patch') }}" placeholder="Enter version, patch or FP" required>
+                                <span class="client-label">Patch (PL 01) / Package Name (FP 2008) <span class="required">*</span></span>
+                                <input class="client-input" name="patch_or_fp" type="text" value="{{ old('patch_or_fp') }}" placeholder="PL 01 or FP 2008" required>
+                            </label>
+
+                            <label class="client-field">
+                                <span class="client-label">Database Version (MSSQL 2019) <span class="required">*</span></span>
+                                <input class="client-input" name="db_version" type="text" value="{{ old('db_version') }}" placeholder="MSSQL 2019" required>
                             </label>
 
                             <label class="client-field">
@@ -805,8 +841,34 @@
                             </h2>
                         </div>
 
-                        <div class="client-form-grid">
+                        <div class="client-form-grid two">
                             <label class="client-field">
+                                <span class="client-label">Account Manager</span>
+                                <span class="select-wrap">
+                                    <select class="client-select" name="account_manager_id">
+                                        <option value="">Select account manager</option>
+                                        @foreach ($accountManagers as $accountManager)
+                                            <option value="{{ $accountManager->id }}" @selected((string) old('account_manager_id') === (string) $accountManager->id)>{{ $accountManager->account_manager }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg><use href="#icon-chevron-down"></use></svg>
+                                </span>
+                            </label>
+
+                            <label class="client-field">
+                                <span class="client-label">Assign FC</span>
+                                <span class="select-wrap">
+                                    <select class="client-select" name="assign_fc_id">
+                                        <option value="">Select FC</option>
+                                        @foreach($assignFcs as $fc)
+                                            <option value="{{ $fc->id }}" @selected((string) old('assign_fc_id') === (string) $fc->id)>{{ $fc->assign_fc }}</option>
+                                        @endforeach
+                                    </select>
+                                    <svg><use href="#icon-chevron-down"></use></svg>
+                                </span>
+                            </label>
+
+                            <label class="client-field span-two">
                                 <span class="client-label">Preferred Support Contact Method <span class="required">*</span></span>
                                 <span class="select-wrap">
                                     <select class="client-select" name="preferred_support_method" required>
@@ -819,7 +881,7 @@
                                 </span>
                             </label>
 
-                            <label class="client-field">
+                            <label class="client-field span-two">
                                 <span class="client-label">Optional Notes or Additional Information</span>
                                 <textarea class="client-textarea" name="additional_notes" placeholder="Additional details about your company (optional)">{{ old('additional_notes') }}</textarea>
                             </label>
@@ -839,6 +901,27 @@
                             <span>I agree to the <a href="#">Terms of Service</a> and acknowledge the <a href="#">Privacy Policy</a>. I consent to the collection and processing of my company's data for the purpose of providing support services.</span>
                         </label>
                     </section>
+
+                    <div class="product-modal" id="product-selection-modal" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+                        <div class="product-modal-dialog">
+                            <div class="product-modal-header">
+                                <h3 id="product-modal-title">Select Product Used</h3>
+                                <button class="product-modal-close" id="close-product-modal" type="button" aria-label="Close">&times;</button>
+                            </div>
+                            <div class="product-modal-body">
+                                @foreach ($sapProducts as $sapProduct)
+                                    <label class="product-modal-option">
+                                        <input type="checkbox" value="{{ $sapProduct->id }}" data-product-name="{{ $sapProduct->sap_product }}" @checked(in_array((string) $sapProduct->id, $selectedProductIds, true))>
+                                        <span>{{ $sapProduct->sap_product }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <div class="product-modal-actions">
+                                <button class="client-button" id="cancel-product-selection" type="button">Cancel</button>
+                                <button class="client-button client-button-primary" id="apply-product-selection" type="button">Apply Selection</button>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="client-actions">
                         <button class="client-button client-button-primary" type="submit">
@@ -931,8 +1014,91 @@
             }
 
             const baseUrl = root.dataset.psgcBaseUrl.replace(/\/+$/, '');
+            const countryCodeApiUrl = root.dataset.countryCodeApiUrl;
+            const selectedCountryCode = root.dataset.selectedCountryCode || '+63';
+            const countryCodeSelect = root.querySelector('select[name="contact_country_code"]');
             const status = document.getElementById('address-status');
             const form = root.querySelector('.client-form');
+            const productModal = document.getElementById('product-selection-modal');
+            const productDisplay = document.getElementById('selected-products-display');
+            const productInputs = document.getElementById('selected-products-inputs');
+            const productCheckboxes = Array.from(productModal.querySelectorAll('input[type="checkbox"]'));
+
+            const loadCountryCodes = async () => {
+                if (!countryCodeApiUrl || !countryCodeSelect) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(countryCodeApiUrl, { headers: { Accept: 'application/json' } });
+
+                    if (!response.ok) {
+                        throw new Error(`Country API returned ${response.status}`);
+                    }
+
+                    const countries = await response.json();
+                    const options = countries.map(country => ({
+                        iso: country.iso,
+                        dialCode: country.dial_code,
+                        name: country.name,
+                    })).sort((a, b) => {
+                        if (a.iso === 'PH') return -1;
+                        if (b.iso === 'PH') return 1;
+                        return a.name.localeCompare(b.name);
+                    });
+
+                    countryCodeSelect.innerHTML = '';
+                    options.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.dialCode;
+                        option.textContent = `${item.iso} ${item.dialCode}`;
+                        option.selected = item.iso === 'PH'
+                            ? selectedCountryCode === '+63'
+                            : item.dialCode === selectedCountryCode && !countryCodeSelect.querySelector(`option[value="${CSS.escape(selectedCountryCode)}"]:checked`);
+                        countryCodeSelect.appendChild(option);
+                    });
+
+                    if (!countryCodeSelect.value) {
+                        countryCodeSelect.value = '+63';
+                    }
+                } catch (error) {
+                    countryCodeSelect.value = '+63';
+                }
+            };
+
+            loadCountryCodes();
+
+            const selectedProductIds = () => Array.from(productInputs.querySelectorAll('input[name="sap_product_ids[]"]')).map(input => input.value);
+            const updateProductDisplay = () => {
+                const ids = selectedProductIds();
+                productDisplay.value = productCheckboxes
+                    .filter(checkbox => ids.includes(checkbox.value))
+                    .map(checkbox => checkbox.dataset.productName)
+                    .join(', ');
+            };
+            const closeProductModal = () => productModal.classList.remove('active');
+            const openProductModal = () => {
+                const ids = selectedProductIds();
+                productCheckboxes.forEach(checkbox => checkbox.checked = ids.includes(checkbox.value));
+                productModal.classList.add('active');
+            };
+
+            document.getElementById('open-product-modal').addEventListener('click', openProductModal);
+            document.getElementById('close-product-modal').addEventListener('click', closeProductModal);
+            document.getElementById('cancel-product-selection').addEventListener('click', closeProductModal);
+            document.getElementById('apply-product-selection').addEventListener('click', () => {
+                productInputs.innerHTML = '';
+                productCheckboxes.filter(checkbox => checkbox.checked).forEach(checkbox => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden'; input.name = 'sap_product_ids[]'; input.value = checkbox.value;
+                    productInputs.appendChild(input);
+                });
+                updateProductDisplay();
+                closeProductModal();
+            });
+            productModal.addEventListener('click', event => { if (event.target === productModal) closeProductModal(); });
+            document.addEventListener('keydown', event => { if (event.key === 'Escape') closeProductModal(); });
+            updateProductDisplay();
 
             const fields = {
                 region: document.getElementById('region_code'),
@@ -1165,6 +1331,10 @@
                     fields.provinceName.value = '';
                     fields.cityName.value = '';
                     fields.barangayName.value = '';
+                    productInputs.innerHTML = '';
+                    productCheckboxes.forEach(checkbox => checkbox.checked = false);
+                    updateProductDisplay();
+                    closeProductModal();
                     loadRegions();
                 }, 0);
             });

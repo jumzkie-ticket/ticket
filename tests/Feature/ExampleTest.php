@@ -23,6 +23,9 @@ class ExampleTest extends TestCase
         $response->assertSee('Roles & Permissions', false);
         $response->assertSee('Role Name');
         $response->assertSee('Analytics per Role');
+        $response->assertSee('.content-area .header-title h1', false);
+        $response->assertSee('color: var(--ink) !important', false);
+        $response->assertSee('.content-area .header-title .eyebrow', false);
     }
 
     public function test_a_role_can_be_created_with_permissions(): void

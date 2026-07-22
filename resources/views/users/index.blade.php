@@ -731,6 +731,7 @@
             'role' => 'Role',
         ];
 
+        $modalClientId = old('clients_id', $selectedUser?->client?->id);
         $modalRoleId = old('role_id', $selectedUser?->roles->first()?->id);
         $isViewMode = $modalMode === 'view';
         $isEditMode = $modalMode === 'edit';
@@ -799,12 +800,7 @@
                     </form>
                 </div>
 
-                @if (session('status'))
-                    <div class="flash">
-                        <svg width="16" height="16"><use href="#icon-check"></use></svg>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                <x-status-prompt />
 
                 @if ($errors->any())
                     <ul class="error-list">
@@ -908,6 +904,10 @@
                 <div class="modal-body">
                     @if ($isViewMode)
                         <div class="form-grid">
+                            <div class="field full">
+                                <label for="view-company-name">Company Name</label>
+                                <input class="input" id="view-company-name" value="{{ $selectedUser->client?->company_name ?? 'No company assigned' }}" readonly>
+                            </div>
                             <div class="field">
                                 <label for="view-first-name">First Name</label>
                                 <input class="input" id="view-first-name" value="{{ $selectedUser->first_name }}" readonly>
@@ -948,6 +948,15 @@
                             @endif
 
                             <div class="form-grid">
+                                <div class="field full">
+                                    <label for="clients-id">Company Name</label>
+                                    <select class="select" id="clients-id" name="clients_id" required>
+                                        <option value="">Select company</option>
+                                        @foreach ($clients as $client)
+                                            <option value="{{ $client->id }}" @selected((int) $modalClientId === $client->id)>{{ $client->company_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="field">
                                     <label for="first-name">First Name</label>
                                     <input class="input" id="first-name" name="first_name" value="{{ old('first_name', $selectedUser?->first_name) }}" required maxlength="80">

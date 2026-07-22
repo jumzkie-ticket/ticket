@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Client;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,12 +18,14 @@ class UserRegistrationTest extends TestCase
         $this->seed();
         $this->signIn();
 
-        $response = $this->get(route('users.index'));
+        $response = $this->get(route('users.index', ['create' => 1]));
 
         $response->assertStatus(200);
         $response->assertSee('User Registration');
         $response->assertSee('Registered Users');
         $response->assertSee('New User');
+        $response->assertSee('Register New User');
+        $response->assertSee('Company Name');
         $response->assertSee('Dashboard');
         $response->assertSee('Support Schedule');
         $response->assertSee('Sign Out');
@@ -34,8 +37,10 @@ class UserRegistrationTest extends TestCase
         $this->signIn();
 
         $role = Role::where('slug', 'customer')->firstOrFail();
+        $client = Client::factory()->create(['company_name' => 'Acme Support Inc.']);
 
         $response = $this->post(route('users.store'), [
+            'clients_id' => $client->id,
             'first_name' => 'Maria',
             'last_name' => 'Client',
             'role_id' => $role->id,
@@ -58,6 +63,10 @@ class UserRegistrationTest extends TestCase
             'user_id' => $user->id,
             'role_id' => $role->id,
         ]);
+        $this->assertDatabaseHas('client_users', [
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+        ]);
     }
 
     public function test_a_user_can_be_viewed_updated_and_deleted(): void
@@ -67,20 +76,25 @@ class UserRegistrationTest extends TestCase
 
         $admin = Role::where('slug', 'admin')->firstOrFail();
         $consultant = Role::where('slug', 'consultant')->firstOrFail();
+        $originalClient = Client::factory()->create(['company_name' => 'Original Company']);
+        $updatedClient = Client::factory()->create(['company_name' => 'Updated Company']);
         $user = User::factory()->create([
             'first_name' => 'View',
             'last_name' => 'Target',
             'email' => 'view.target@example.test',
         ]);
+        $user->clientUser()->create(['client_id' => $originalClient->id]);
         $user->roles()->sync([$admin->id]);
 
         $this->get(route('users.index', ['view' => $user->id]))
             ->assertStatus(200)
             ->assertSee('User Details')
+            ->assertSee('Original Company')
             ->assertSee('View')
             ->assertSee('Target');
 
         $this->put(route('users.update', $user), [
+            'clients_id' => $updatedClient->id,
             'first_name' => 'Edited',
             'last_name' => 'Target',
             'role_id' => $consultant->id,
@@ -89,6 +103,11 @@ class UserRegistrationTest extends TestCase
 
         $user->refresh();
 
+        $this->assertTrue($user->client->is($updatedClient));
+        $this->assertDatabaseHas('client_users', [
+            'user_id' => $user->id,
+            'client_id' => $updatedClient->id,
+        ]);
         $this->assertSame('Edited', $user->first_name);
         $this->assertSame('edited.target@example.test', $user->email);
         $this->assertDatabaseHas('role_user', [

@@ -105,9 +105,9 @@
             height: 17px;
         }
 
-        h1 {
+        .header-title h1 {
             margin: 0;
-            color: #061845;
+            color: var(--ink);
             font-size: 28px;
             line-height: 1.08;
             font-weight: 900;
@@ -973,12 +973,7 @@
                     </div>
                 </div>
 
-                @if (session('status'))
-                    <div class="flash">
-                        <svg width="16" height="16"><use href="#icon-check"></use></svg>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                <x-status-prompt />
 
                 @if ($errors->any())
                     <ul class="error-list">

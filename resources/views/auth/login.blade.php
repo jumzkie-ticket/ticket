@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <title>Sign in | Xceler8 Support System</title>
 
@@ -396,6 +397,20 @@
             color: var(--blue);
         }
 
+        .register-prompt {
+            margin: 20px 0 0;
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .register-prompt a {
+            color: var(--blue);
+            font-weight: 900;
+            text-decoration: none;
+        }
+
         .footer {
             display: flex;
             align-items: center;
@@ -536,12 +551,7 @@
                 <h2 class="form-title" id="login-title">Sign in</h2>
                 <p class="form-subtitle">Use your portal account to continue.</p>
 
-                @if (session('status'))
-                    <div class="flash">
-                        <svg width="16" height="16"><use href="#icon-check"></use></svg>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                <x-status-prompt />
 
                 <form method="POST" action="{{ route('login.store') }}">
                     @csrf
@@ -588,6 +598,11 @@
                         <svg><use href="#icon-support"></use></svg>
                         <span>Contact Support</span>
                     </a>
+
+                    <p class="register-prompt">
+                        Need a portal account?
+                        <a href="{{ route('register') }}">Register New User</a>
+                    </p>
                 </form>
             </section>
         </section>
