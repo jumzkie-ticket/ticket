@@ -21,12 +21,28 @@
     {
       "src": "api/test.php",
       "use": "vercel-php@0.8.0"
+    },
+    {
+      "src": "api/laravel-test.php",
+      "use": "vercel-php@0.8.0",
+      "config": {
+        "includeFiles": [
+          "vendor/**",
+          "bootstrap/**",
+          "config/**",
+          "app/**"
+        ]
+      }
     }
   ],
   "routes": [
     {
       "src": "/test",
       "dest": "/api/test.php"
+    },
+    {
+      "src": "/laravel-test",
+      "dest": "/api/laravel-test.php"
     },
     {
       "src": "/build/(.*)",
