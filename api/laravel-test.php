@@ -4,7 +4,19 @@
 header('Content-Type: application/json');
 
 try {
-    // Set environment variables (same as api/index.php)
+    define('LARAVEL_START', microtime(true));
+    
+    // Load Composer autoloader FIRST
+    require __DIR__.'/../vendor/autoload.php';
+    
+    // Manually load Dotenv and set environment variables
+    $repository = Dotenv\Repository\RepositoryBuilder::createWithNoAdapters()
+        ->addAdapter(Dotenv\Repository\Adapter\EnvConstAdapter::class)
+        ->addAdapter(Dotenv\Repository\Adapter\PutenvAdapter::class)
+        ->immutable()
+        ->make();
+
+    // Set environment variables from Vercel $_ENV
     $envVars = [
         'APP_NAME', 'APP_ENV', 'APP_KEY', 'APP_DEBUG', 'APP_URL', 'APP_LOCALE', 'APP_FALLBACK_LOCALE',
         'LOG_CHANNEL', 'LOG_LEVEL',
@@ -16,42 +28,15 @@ try {
 
     foreach ($envVars as $var) {
         if (isset($_ENV[$var])) {
-            putenv("$var={$_ENV[$var]}");
-            $_SERVER[$var] = $_ENV[$var];
+            $repository->set($var, $_ENV[$var]);
         }
     }
 
-    if (!getenv('APP_ENV')) {
-        putenv('APP_ENV=production');
-        $_SERVER['APP_ENV'] = 'production';
-    }
-    if (!getenv('LOG_CHANNEL')) {
-        putenv('LOG_CHANNEL=stderr');
-        $_SERVER['LOG_CHANNEL'] = 'stderr';
-    }
+    // Set defaults
+    if (!$repository->has('APP_ENV')) $repository->set('APP_ENV', 'production');
+    if (!$repository->has('LOG_CHANNEL')) $repository->set('LOG_CHANNEL', 'stderr');
 
-    // Create .env file in /tmp
-    $tmpEnvPath = '/tmp/.env';
-    if (!file_exists($tmpEnvPath)) {
-        $envContent = '';
-        foreach ($envVars as $var) {
-            $value = getenv($var);
-            if ($value !== false) {
-                $value = str_contains($value, ' ') ? "\"{$value}\"" : $value;
-                $envContent .= "$var=$value\n";
-            }
-        }
-        file_put_contents($tmpEnvPath, $envContent);
-    }
-
-    putenv("LARAVEL_ENV_PATH=/tmp");
-    $_SERVER['LARAVEL_ENV_PATH'] = '/tmp';
-
-    // Load Laravel
-    define('LARAVEL_START', microtime(true));
-    
-    require __DIR__.'/../vendor/autoload.php';
-    
+    // Now bootstrap Laravel - it should use the environment we just set
     $app = require_once __DIR__.'/../bootstrap/app.php';
     
     echo json_encode([
