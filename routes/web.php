@@ -23,6 +23,19 @@ use App\Http\Controllers\UserRegistrationController;
 use App\Http\Controllers\WorkAgreementController;
 use Illuminate\Support\Facades\Route;
 
+// Debug route to check if PHP is working
+Route::get('/debug', function () {
+    return response()->json([
+        'status' => 'PHP is working!',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'environment' => app()->environment(),
+        'app_key_set' => !empty(config('app.key')),
+        'vendor_exists' => file_exists(base_path('vendor/autoload.php')),
+        'storage_writable' => is_writable(storage_path()),
+    ]);
+});
+
 Route::get('/', fn () => auth()->check()
     ? redirect()->route('dashboard')
     : redirect()->route('login')
