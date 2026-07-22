@@ -92,6 +92,36 @@ dirs.forEach(dir => {
   }
 });
 
+// Create a .env file from environment variables (Vercel provides these)
+console.log('Creating .env file from Vercel environment variables...');
+const envContent = `# Auto-generated from Vercel environment variables
+APP_NAME="${process.env.APP_NAME || 'Laravel'}"
+APP_ENV="${process.env.APP_ENV || 'production'}"
+APP_KEY="${process.env.APP_KEY || ''}"
+APP_DEBUG="${process.env.APP_DEBUG || 'false'}"
+APP_URL="${process.env.APP_URL || ''}"
+
+LOG_CHANNEL="${process.env.LOG_CHANNEL || 'stderr'}"
+LOG_LEVEL="${process.env.LOG_LEVEL || 'error'}"
+
+DB_CONNECTION="${process.env.DB_CONNECTION || 'sqlite'}"
+DB_HOST="${process.env.DB_HOST || ''}"
+DB_PORT="${process.env.DB_PORT || ''}"
+DB_DATABASE="${process.env.DB_DATABASE || ''}"
+DB_USERNAME="${process.env.DB_USERNAME || ''}"
+DB_PASSWORD="${process.env.DB_PASSWORD || ''}"
+DB_SSLMODE="${process.env.DB_SSLMODE || ''}"
+
+SESSION_DRIVER="${process.env.SESSION_DRIVER || 'cookie'}"
+SESSION_LIFETIME="${process.env.SESSION_LIFETIME || '120'}"
+CACHE_DRIVER="${process.env.CACHE_DRIVER || 'array'}"
+QUEUE_CONNECTION="${process.env.QUEUE_CONNECTION || 'sync'}"
+FILESYSTEM_DISK="${process.env.FILESYSTEM_DISK || 'public'}"
+`;
+
+fs.writeFileSync('.env', envContent);
+console.log('.env file created successfully!');
+
 // Clean up local composer if we downloaded it
 if (composerCmd === './composer' && fs.existsSync('composer')) {
   fs.unlinkSync('composer');
